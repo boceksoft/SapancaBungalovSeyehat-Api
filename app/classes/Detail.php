@@ -73,7 +73,7 @@ where  h.url".UZANTI."=:Slug and h.aktif".UZANTI." = 1 order by h.aktif desc";
         $json = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($json["onecikan"]!=""){
-            $query = $db->prepare("select id,baslik".DILUZANTI." as baslik from oneCikanOzellikler where id in (".$json["onecikan"].")");
+            $query = $db->prepare("select id,baslik".DILUZANTI." as baslik, icon from oneCikanOzellikler where id in (".$json["onecikan"].")");
             $query->execute();
             $json["onecikan"] = $query->fetchAll(PDO::FETCH_ASSOC);
         }
