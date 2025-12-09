@@ -59,6 +59,12 @@ GROUP BY i.emlak
                         rulesruletypes.[value]  as [value] 
                         FROM rulesruletypes INNER JOIN ruletypes ON ruletypes.id = rulesruletypes.ruletypes WHERE  rulesId = r.id for json path) AS maddeler 
                         FROM   ruleshomes rh INNER JOIN rules r ON r.id = rh.rulesId WHERE  r.isactive = 1 AND rh.homesId = ".$EntityId." for json path),'') as kurallar ) as kurallar,
+           (select 
+               isnull(string_agg( cast(
+               dbo.Fn_aratarihlerGun(CONVERT(varchar(10), CONVERT(date, hs.tarih1, 103), 23),CONVERT(varchar(10), CONVERT(date, hs.tarih2, 103), 23),0,0,0,0,hs.cuma,hs.cumartesi,hs.pazar,0)
+                AS nvarchar(max)),','),'') AS fiyatlarhaftasonutarihler,
+               isnull(string_agg(cast(replicate(CONVERT(nvarchar,isnull(fiyat,0))+',',dbo.Fn_aratarihlerGun(convert(date,hs.tarih1,103),convert(date,hs.tarih2,103),0,0,0,0,hs.cuma,hs.cumartesi,hs.pazar,1)) AS nvarchar(max)),''),'') AS haftasonufiyatlar 
+               FROM haftasonu hs left join dbo.kanun7464 kanun on kanun.homeId=hs.emlak WHERE hs.emlak=".$EntityId." AND CONVERT(date,hs.tarih2,104)>=CONVERT(date,getdate(),104) ) AS haftasonu,
             (select  
                     isnull(string_agg( 
                         cast(concat(year(convert(date,tarih1,104)) ,'-' ,format(convert(date,tarih1,104),'MM'),'-', format(convert(date,tarih1,104),'dd'),',', 
