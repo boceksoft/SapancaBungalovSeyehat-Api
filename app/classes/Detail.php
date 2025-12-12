@@ -245,4 +245,47 @@ where o.aktif = 1
         return $json;
     }
 
+
+
+    public static function Tablishment($Routing){
+        global $qsql;
+
+        //TESİS
+        $SQL = "SELECT T.*, T.Baslik AS title,
+                   (SELECT STRING_AGG(TE.emlakId, ',') FROM dbo.TesisEmlaklari TE WHERE TE.tesisId = T.id) AS Emlaklar
+                FROM dbo.Tesisler T
+                WHERE T.id = :id";
+
+        $stmt = db()->prepare($SQL);
+        $stmt->execute(['id' => $Routing['EntityId']]);
+        $tesis = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        //RESİMLER
+        $SQL = "SELECT uploadID, FileName FROM upload WHERE islm_id = :id AND islm ='tesis' ORDER BY sira";
+        $stmt = db()->prepare($SQL);
+        $stmt->execute(['id' => $Routing['EntityId']]);
+        $tesis['photos'] = $stmt->fetch(PDO::FETCH_ASSOC) ?? null;
+
+        //EMLAKLAR
+        $SQL = "SELECT id, baslik".UZANTI." AS baslik, kisa_icerik, koltuk, banyo FROM dbo.homes WHERE id in ({$tesis['Emlaklar']}) AND aktif = 1 ORDER BY siralama";
+        $stmt = db()->prepare($SQL);
+        $stmt->execute();
+        $homes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        //ÖZELLİKLER
+        $SQL = "SELECT id, baslik".UZANTI." AS baslik, icon FROM dbo.ozellikler WHERE id in ({$tesis['Properties']}) ORDER BY siralama";
+        $stmt = db()->prepare($SQL);
+        $stmt->execute();
+        $properties = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $tesis['properties'] = $properties;
+        $tesis['homes'] = $homes;
+
+        //BREADCRUMB
+        $BreadCrumb = new BreadCrumb($Routing,$tesis);
+        $tesis["BreadCrumb"] = $BreadCrumb->Result();
+
+        return $tesis;
+    }
+
 }

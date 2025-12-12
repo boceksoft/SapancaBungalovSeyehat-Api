@@ -23,7 +23,7 @@ class BreadCrumb
         global $config;
         $return = [];
         $Home = Page::GetById(1);
-        $url = $this->Page['url'];
+        $url = $this->Page['url'] ?? $this->Page['MetaUrl'];
 
         //remove if url start with /
         $url = ltrim($url,"/");
@@ -75,6 +75,26 @@ class BreadCrumb
                             "url"=> $this->Page["url"],
                             "name"=> $this->Page["baslik"],
                             "title"=>$this->Page["title"],
+                        ]
+
+                    ]
+                ];
+
+                break;
+                case "TablishmentDetail" :
+
+                $return = [
+                    "baslik"=> $this->Page['Baslik'],
+                    "data"=>[
+                        [
+                            "url"=> "/",
+                            "name"=> "Anasayfa",
+                            "title"=>$Home["title"]
+                        ],
+                        [
+                            "url"=> $this->Page["MetaUrl"],
+                            "name"=> $this->Page["Baslik"],
+                            "title"=>$this->Page["Baslik"],
                         ]
 
                     ]
