@@ -264,16 +264,16 @@ where o.aktif = 1
         $SQL = "SELECT uploadID, FileName FROM upload WHERE islm_id = :id AND islm ='tesis' ORDER BY sira";
         $stmt = db()->prepare($SQL);
         $stmt->execute(['id' => $Routing['EntityId']]);
-        $tesis['photos'] = $stmt->fetch(PDO::FETCH_ASSOC) ?? null;
+        $tesis['photos'] = $stmt->fetchAll(PDO::FETCH_ASSOC) ?? null;
 
         //EMLAKLAR
-        $SQL = "SELECT id, baslik".UZANTI." AS baslik, kisa_icerik, koltuk, url".UZANTI." AS url, banyo, resim FROM dbo.homes WHERE id in ({$tesis['Emlaklar']}) AND aktif = 1 ORDER BY siralama";
+        $SQL = "SELECT id, baslik".UZANTI." AS baslik, kisa_icerik, koltuk, url".UZANTI." AS url, banyo, resim, ribbon, kisi, yatak_sayisi FROM dbo.homes WHERE id in ({$tesis['Emlaklar']}) AND aktif = 1 ORDER BY siralama";
         $stmt = db()->prepare($SQL);
         $stmt->execute();
         $homes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         //ÖZELLİKLER
-        $SQL = "SELECT id, baslik".UZANTI." AS baslik, icon FROM dbo.ozellikler WHERE id in ({$tesis['Properties']}) ORDER BY siralama";
+        $SQL = "SELECT id, baslik".UZANTI." AS baslik, resim as icon, favori FROM dbo.ozellikler WHERE id in ({$tesis['Properties']}) AND cat <> 0 ORDER BY siralama";
         $stmt = db()->prepare($SQL);
         $stmt->execute();
         $properties = $stmt->fetchAll(PDO::FETCH_ASSOC);
