@@ -267,7 +267,7 @@ where o.aktif = 1
         $tesis['photos'] = $stmt->fetch(PDO::FETCH_ASSOC) ?? null;
 
         //EMLAKLAR
-        $SQL = "SELECT id, baslik".UZANTI." AS baslik, kisa_icerik, koltuk, url".UZANTI." AS url, banyo FROM dbo.homes WHERE id in ({$tesis['Emlaklar']}) AND aktif = 1 ORDER BY siralama";
+        $SQL = "SELECT id, baslik".UZANTI." AS baslik, kisa_icerik, koltuk, url".UZANTI." AS url, banyo, resim FROM dbo.homes WHERE id in ({$tesis['Emlaklar']}) AND aktif = 1 ORDER BY siralama";
         $stmt = db()->prepare($SQL);
         $stmt->execute();
         $homes = $stmt->fetchAll(PDO::FETCH_ASSOC);
