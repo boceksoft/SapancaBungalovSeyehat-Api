@@ -16,6 +16,24 @@ class Product
                 $fyt_=0;
                 $toplam_gun=date_diff($date2,$date1)->days;
 
+                $ruleControl = $db->prepare("SELECT TOP 1 * FROM dbo.calendarRules WHERE home_id = :id AND (:start_date BETWEEN start_date AND end_date OR :end_date BETWEEN start_date AND end_date)");
+                $ruleControl->execute([
+                   'id'=>$EntityId,
+                   'start_date'=>$start,
+                   'end_date'=>$end,
+                ]);
+                $ruleControl = $ruleControl->fetch(PDO::FETCH_ASSOC);
+                if (!empty($ruleControl)){
+                    if ($ruleControl['start_date'] !== $start || $ruleControl['end_date'] !== $end){
+                        if ($ruleControl['start_date'] == $start && $ruleControl['end_date'] <= $end){}
+                        else{
+                            $json['error'] = "Seçtiğiniz tarihler kiralama kuralına aykırıdır! Şu tarihlerde seçim yapabilirsiniz, '{$ruleControl["start_date"]}' - '{$ruleControl["end_date"]}'.";
+                            return $json;
+                        }
+                    }
+
+                }
+
                 $query = $db->prepare("select cast(FiyatTablosu.ToplamTutar*Rd.Buy as decimal(10,0))  as fyt,cast(FiyatTablosu.IndirimTutari*Rd.Buy as decimal(10,0)) as indirimTutari, Rd.Buy, 
         (select top 1 
             (case when isnull(temizlikgece,0)=0 then gece 

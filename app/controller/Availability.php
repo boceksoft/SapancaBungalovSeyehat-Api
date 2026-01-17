@@ -66,18 +66,42 @@ GROUP BY i.emlak
                isnull(string_agg(cast(replicate(CONVERT(nvarchar,isnull(fiyat,0))+',',dbo.Fn_aratarihlerGun(convert(date,hs.tarih1,103),convert(date,hs.tarih2,103),0,0,0,0,hs.cuma,hs.cumartesi,hs.pazar,1)) AS nvarchar(max)),''),'') AS haftasonufiyatlar 
                FROM haftasonu hs left join dbo.kanun7464 kanun on kanun.homeId=hs.emlak WHERE hs.emlak=".$EntityId." AND CONVERT(date,hs.tarih2,104)>=CONVERT(date,getdate(),104) ) AS haftasonu,
             (select  
-                    isnull(string_agg( 
-                        cast(concat(year(convert(date,tarih1,104)) ,'-' ,format(convert(date,tarih1,104),'MM'),'-', format(convert(date,tarih1,104),'dd'),',', 
-                        dbo.Fn_aratarihler2(convert(date,tarih1,104),convert(date,tarih2,104)),
-                        ',',year(convert(date,tarih2,104)) ,'-' ,format(convert(date,tarih2,104),'MM'),'-', format(convert(date,tarih2,104),'dd')) as nvarchar(max)),','),'') as fiyatlarTarihler,
-                    isnull(string_agg(cast(REPLICATE(convert(nvarchar,(cast((isnull(convert(float,fiyat*RD.Buy),0)/7) as decimal(10,0))))+',',datediff(day,convert(date,tarih1,104),convert(date,tarih2,104)))+convert(nvarchar,(cast(isnull(convert(float,fiyat*RD.Buy),0)/7 as decimal(10,0)))) as nvarchar(max)),','),'') as fiyatlar 
-                    from sezonlar                 
-                    left join kanun7464 ka on ka.homeId=".$home["id"]." 
-                    inner join Finance.Currency FromC on FromC.CurrencyName='".$home["doviz"]."'
-                    inner join Finance.Currency ToC on ToC.CurrencyId=:DefaultCurrencyId
-                    inner join Finance.RateDetail RD on RD.ToCurrencyId=ToC.CurrencyId 
-                        and RD.FromCurrencyId=FromC.CurrencyId and RD.RateId=:RateId 
-                where site=".PRICE_SITE." ".$explodeWhere." and  islem_id=".$EntityId." and islem='emlak' and convert(date,tarih2,104)>=convert(date,getdate(),104)) as fiyatlar";
+                isnull(string_agg( 
+                    cast(
+                        concat(
+                            year(convert(date,tarih1,104)) ,'-' ,
+                            format(convert(date,tarih1,104),'MM'),'-',
+                            format(convert(date,tarih1,104),'dd')
+                        ) as nvarchar(max)
+                    ),','),'') as fiyatlarTarihler,
+            
+                isnull(string_agg(
+                    cast(
+                        convert(nvarchar,
+                            cast(
+                                (isnull(convert(float,fiyat*RD.Buy),0)/7) 
+                            as decimal(10,0))
+                        )
+                    as nvarchar(max))
+                ,','),'') as fiyatlar
+            
+            from sezonlar                 
+            left join kanun7464 ka on ka.homeId=".$home["id"]." 
+            inner join Finance.Currency FromC on FromC.CurrencyName='".$home["doviz"]."'
+            inner join Finance.Currency ToC on ToC.CurrencyId=:DefaultCurrencyId
+            inner join Finance.RateDetail RD 
+                on RD.ToCurrencyId=ToC.CurrencyId 
+                and RD.FromCurrencyId=FromC.CurrencyId 
+                and RD.RateId=:RateId 
+            
+            where 
+                site=".PRICE_SITE." 
+                ".$explodeWhere." 
+                and islem_id=".$EntityId." 
+                and islem='emlak' 
+                and convert(date,tarih1,104)>=convert(date,getdate(),104)
+            
+            ) as fiyatlar";
 
 $query = $db->prepare($verisql);
 $query->execute([
